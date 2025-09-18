@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oneboard - Sistema de Onboarding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(to bottom right, #f9f9fb, #f4f6fc);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .progress-ring__background { stroke: #e5e7eb; }
+        .progress-ring__progress { 
+            stroke: #f59e0b;
+            transition: stroke-dashoffset 0.5s;
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+    .hidden {
+        display: none;
+    }
+        
+        /* Animações para o menu mobile */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            z-index: 40;
+        }
+        .overlay.open {
+            display: block;
+        }
+        
+        /* Abas */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Calendário */
+        .calendar {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .calendar-header {
+            background: linear-gradient(135deg, #660099, #8a3ffb);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #f0f0f0;
+        }
+        
+        .calendar-day {
+            background: white;
+            min-height: 100px;
+            padding: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover {
+            background: #f8f7ff;
+        }
+        
+        .calendar-day.header {
+            background: #f5f3ff;
+            min-height: auto;
+            padding: 12px 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #660099;
+        }
+        
+        .day-number {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .event {
+            background: #f0e6ff;
+            border-left: 3px solid #660099;
+            padding: 6px 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .event:hover {
+            background: #e6d9ff;
+        }
+        
+        .event-time {
+            font-weight: 600;
+            color: #660099;
+            margin-right: 5px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .current-date {
+            font-size: 18px;
+            font-weight: 600;
+            color: #660099;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .add-event-btn {
+            background: linear-gradient(135deg, #660099, #8a3ffb);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(102, 0, 153, 0.2);
+        }
+        
+        .add-event-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 0, 153, 0.3);
+        }
+        
+        .today {
+            background: #f0e6ff;
+        }
+        
+        .today .day-number {
+            color: #660099;
+            font-weight: 700;
+        }
+        
+        .has-event::after {
+            content: "";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ff9900;
+            border-radius: 50%;
+        }
+        
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #660099;
+            color: white;
+            border: none;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+        }
+        
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+            border: none;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #660099;
+            box-shadow: 0 0 0 3px rgba(102, 0, 153, 0.1);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+
+                /* Estilos para o Ponto de Status */
+        .status-dot {
+            width: 1rem; /* 16px */
+            height: 1rem; /* 16px */
+            border-radius: 9999px; /* circulo completo */
+            transition: background-color 0.3s;
+        }
+        .status-green { background-color: #22c55e; } /* verde */
+        .status-red { background-color: #ef4444; } /* vermelho */
+        .status-yellow { background-color: #f59e0b; } /* amarelo */
+        .status-gray { background-color: #9ca3af; } /* cinza */
+
+             .achievement-card {
+            transition: all 0.5s ease; /* Animação suave ao desbloquear */
+            background-color: #f9fafb; /* Um cinza bem claro */
+            border-radius: 1rem; /* 16px */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(80%); /* Deixa quase tudo em preto e branco */
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-day {
+                min-height: 80px;
+                padding: 8px 5px;
+            }
+            
+            .event {
+                padding: 4px 6px;
+                font-size: 11px;
+            }
+            
+            .day-number {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <!-- Overlay para menu mobile -->
+        <div class="overlay" id="overlay"></div>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar-mobile fixed inset-y-0 left-0 z-50 w-64 bg-[#660099] text-white flex flex-col p-6 shadow-xl" id="sidebar">
+            <h1 class="text-3xl font-extrabold tracking-wide mb-10">Oneboard</h1>
+            <nav class="space-y-6">
+                <button class="tab-btn flex w-full text-left items-center gap-3 text-lg text-[#ff9900]" data-tab="dashboard">
+                    <i data-lucide="home" class="w-5 h-5"></i> Dashboard
+                </button>
+                <button class="tab-btn flex w-full text-left items-center gap-3 text-lg hover:text-[#ff9900]" data-tab="colaboradores">
+                    <i data-lucide="user" class="w-5 h-5"></i> Colaboradores
+                </button>
+                <button class="tab-btn flex w-full text-left items-center gap-3 text-lg hover:text-[#ff9900]" data-tab="trilhas">
+                    <i data-lucide="book-open" class="w-5 h-5"></i> Trilhas
+                </button>
+                <button class="tab-btn flex w-full text-left items-center gap-3 text-lg hover:text-[#ff9900]" data-tab="conquistas">
+                    <i data-lucide="award" class="w-5 h-5"></i> Conquistas
+                </button>
+                <button class="tab-btn flex w-full text-left items-center gap-3 text-lg hover:text-[#ff9900]" data-tab="configuracoes">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Configurações
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header class="h-16 bg-white shadow-md flex items-center justify-between px-4 lg:px-6 border-b">
+                <div class="flex items-center gap-3">
+                    <button class="p-2 rounded-md hover:bg-gray-100 " id="menu-toggle">
+                        <i data-lucide="menu" class="text-[#660099] w-5 h-5"></i>
+                    </button>
+                    <input type="text" placeholder="Buscar..." class="px-4 py-2 rounded-full border border-gray-200 w-52 lg:w-72 focus:outline-none focus:ring-2 focus:ring-[#660099]">
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 rounded-md hover:bg-gray-100">
+                        <i data-lucide="bell" class="text-gray-600 hover:text-[#660099] w-5 h-5"></i>
+                                </button>
+                                <button class="hidden sm:flex items-center gap-3" id="profileTrigger">
+                <span class="font-medium">Victor Andrade</span>
+                <div class="w-10 h-10 bg-[#eb3c7d] rounded-full flex items-center justify-center text-white font-bold shadow-lg">VA</div>
+                </button>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+                <!-- Conteúdo do Dashboard -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="space-y-8">
+                        <!-- Título e Botão -->
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-3xl font-extrabold text-[#660099]">Jornada do Colaborador</h2>
+                            <button class="bg-[#660099] hover:bg-purple-800 text-white rounded-full shadow-md px-5 py-2" id="toggle-topics">
+                                Mostrar Tópicos
+                            </button>
+                        </div>
+
+                        <!-- Cards de Progresso -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Card Progresso -->
+                          <div class="shadow-xl border-0 rounded-2xl bg-white p-6">
+                                <h3 class="text-xl font-bold text-[#ff9900]">Progresso</h3>
+                                <p id="progressText" class="text-sm text-gray-600 mt-2">Calculando...</p>
+                                <div class="relative h-32 w-32 mx-auto mt-5">
+                                    <svg class="w-full h-full" viewBox="0 0 36 36" style="transform: rotate(-90deg);">
+                                        <path class="text-gray-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                        <path id="progressRing" class="text-[#ff9900]" stroke-width="3" stroke="currentColor" fill="none" stroke-dasharray="100, 100" stroke-dashoffset="100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span id="progressPercentage" class="text-lg font-bold text-[#ff9900]">0%</span>
+                                    </div>
+                                </div>
+                                <p class="mt-4 text-sm text-gray-600 text-center">Você está indo muito bem! Complete mais etapas para desbloquear conquistas 🎖️</p>
+                            </div>
+
+                            <!-- Card Treinamentos -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white p-6">
+                                <h3 class="text-xl font-bold text-[#eb3c7d]">Treinamentos</h3>
+                                <p class="text-sm text-gray-600 mt-2">4 pendentes</p>
+                                <button class="go-to-tab mt-4 w-full bg-[#eb3c7d] hover:bg-pink-600 text-white rounded-full shadow-md py-2" data-tab="trilhas">
+                                    Acessar
+                                </button>
+                                <div class="mt-6 border-t pt-4">
+                                    <h4 class="font-semibold text-[#eb3c7d] mb-2">Notificações</h4>
+                                    <ul id="notificationsList" class="space-y-2 text-sm">
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Card Próxima Etapa -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white p-6">
+                                <h3 class="text-xl font-bold text-[#660099]">Próxima Etapa</h3>
+                                <p class="text-sm text-gray-600 mt-2">Buddy & CSL</p>
+                                <button class="go-to-tab mt-4 w-full bg-[#660099] hover:bg-purple-800 text-white rounded-full shadow-md py-2" data-tab="trilhas">
+                                    Continuar
+                                </button>
+                                <div class="mt-6 border-t pt-4">
+                                    <h4 class="font-semibold text-[#660099] mb-2">Ranking da Equipe</h4>
+                                    <div class="space-y-3">
+                                        <!-- Item Ranking -->
+                                        <div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="https://i.pravatar.cc/150?img=5" alt="Luiza Martins" class="w-6 h-6 rounded-full object-cover">
+                                                    <span class="text-sm text-gray-700">1. Luiza Martins</span>
+                                                </div>
+                                                <span class="text-xs text-gray-500">91%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 h-1.5 rounded mt-1">
+                                                <div class="h-1.5 bg-[#660099] rounded" style="width: 91%"></div>
+                                            </div>
+                                        </div>
+                                        <!-- Item Ranking -->
+                                        <div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="https://i.pravatar.cc/150?img=1" alt="Ana Souza" class="w-6 h-6 rounded-full object-cover">
+                                                    <span class="text-sm text-gray-700">2. Ana Souza</span>
+                                                </div>
+                                                <span class="text-xs text-gray-500">82%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 h-1.5 rounded mt-1">
+                                                <div class="h-1.5 bg-[#660099] rounded" style="width: 82%"></div>
+                                            </div>
+                                        </div>
+                                        <!-- Item Ranking -->
+                                        <div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <img src="https://i.pravatar.cc/150?img=3" alt="Marina Alves" class="w-6 h-6 rounded-full object-cover">
+                                                    <span class="text-sm text-gray-700">3. Marina Alves</span>
+                                                </div>
+                                                <span class="text-xs text-gray-500">74%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 h-1.5 rounded mt-1">
+                                                <div class="h-1.5 bg-[#660099] rounded" style="width: 74%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calendário Moderno -->
+                        <div class="bg-white p-8 rounded-2xl shadow-xl mb-8">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-2xl font-bold text-[#660099] flex items-center gap-2">
+                                    <i data-lucide="calendar" class="text-[#660099] w-6 h-6"></i> Calendário
+                                </h3>
+                                <button class="add-event-btn" id="addEventBtn">
+                                    <i class="fas fa-plus"></i> Novo Evento
+                                </button>
+                            </div>
+                            
+                            <div class="calendar">
+                                <div class="calendar-header">
+                                    <button id="prevMonth" class="text-white bg-transparent border-none cursor-pointer">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h2 id="currentMonth" class="text-xl font-bold">Setembro 2023</h2>
+                                    <button id="nextMonth" class="text-white bg-transparent border-none cursor-pointer">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="calendar-grid">
+                                    <div class="calendar-day header">Dom</div>
+                                    <div class="calendar-day header">Seg</div>
+                                    <div class="calendar-day header">Ter</div>
+                                    <div class="calendar-day header">Qua</div>
+                                    <div class="calendar-day header">Qui</div>
+                                    <div class="calendar-day header">Sex</div>
+                                    <div class="calendar-day header">Sáb</div>
+                                    
+                                    <!-- Dias do calendário serão preenchidos via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-2xl shadow-xl mb-8">
+                        <div class="flex items-center justify-center mb-8">
+                            <h3 class="text-3xl font-bold text-[#660099] flex items-center gap-3">
+                                <i data-lucide="user-check" class="text-[#660099] w-7 h-7"></i>
+                                Fale com seu Buddy
+                            </h3>
+                        </div>
+
+                        <div class="flex flex-col lg:flex-row items-center justify-center gap-10">
+
+                            <div class="text-center max-w-sm">
+                                <img src="https://i.pravatar.cc/150?img=1" alt="Foto do Buddy" class="w-36 h-36 rounded-full object-cover border-4 border-[#ff9900] shadow-md mx-auto">
+                                <h4 class="mt-4 text-2xl font-bold text-gray-800">Ana Souza</h4>
+                                <p class="text-md text-gray-500">Gerente de Produtos Digitais</p>
+
+                                <div class="mt-6 text-left border-t border-gray-200 pt-4">
+                                    <p class="text-sm text-gray-600 italic leading-relaxed">
+                                        "Olá! Sou a Ana, sua Buddy aqui na empresa. Adoro café, planilhas bem organizadas e ajudar novos colegas a encontrarem os melhores caminhos por aqui. Estou na área de Produtos há 5 anos e posso te ajudar com qualquer dúvida sobre nossas ferramentas ou sobre quem procurar para resolver qualquer assunto. Conte comigo para o que precisar!"
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="w-full lg:w-auto border-t lg:border-t-0 lg:border-l border-gray-200 pt-6 lg:pt-0 lg:pl-10 text-center lg:text-left">
+                                <h5 class="font-semibold text-gray-700 mb-4 text-xl">Como me contactar:</h5>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-center lg:justify-start gap-4 text-gray-600 text-lg">
+                                        <i data-lucide="mail" class="w-6 h-6 text-[#eb3c7d]"></i>
+                                        <span>ana.souza@empresa.com</span>
+                                    </div>
+                                    <div class="flex items-center justify-center lg:justify-start gap-4 text-gray-600 text-lg">
+                                        <i data-lucide="phone" class="w-6 h-6 text-[#eb3c7d]"></i>
+                                        <span>(11) 99123-4567</span>
+                                    </div>
+                                    <div class="flex items-center justify-center lg:justify-start gap-4 text-gray-600 text-lg">
+                                        <i data-lucide="message-square" class="w-6 h-6 text-[#eb3c7d]"></i>
+                                        <span>Disponível no chat interno</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        
+                        <!-- Tópicos (inicialmente oculto) -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 hidden" id="topics-container">
+                            <h3 class="text-2xl font-bold text-[#660099] mb-4">Tópicos</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-center gap-4">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold bg-[#ff9900]">✓</div>
+                                    <div>
+                                        <div class="font-medium text-[#660099]">Tô na Vivo</div>
+                                        <div class="text-sm text-gray-600">Orientações iniciais do RH.</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold bg-[#ff9900]">✓</div>
+                                    <div>
+                                        <div class="font-medium text-[#660099]">Vibe</div>
+                                        <div class="text-sm text-gray-600">Escolha de benefícios.</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold bg-[#eb3c7d] animate-pulse">3</div>
+                                    <div>
+                                        <div class="font-medium text-[#660099]">Buddy & CSL</div>
+                                        <div class="text-sm text-gray-600">Indicação de buddy e credenciais.</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-300">4</div>
+                                    <div>
+                                        <div class="font-medium text-[#660099]">Acessos áreas</div>
+                                        <div class="text-sm text-gray-600">Solicitação de acessos.</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gray-300">5</div>
+                                    <div>
+                                        <div class="font-medium text-[#660099]">Trilhas técnicas</div>
+                                        <div class="text-sm text-gray-600">Capacitação técnica.</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo de Colaboradores -->
+                <div class="tab-content" id="colaboradores">
+                    <div class="space-y-6">
+                        <h2 class="text-3xl font-extrabold text-[#660099]">Sua Equipe</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Colaborador 1 -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                <div class="p-6 flex items-center gap-4">
+                                    <img src="https://i.pravatar.cc/150?img=5" alt="Luiza Martins" class="w-16 h-16 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-[#660099]">Luiza Martins</h4>
+                                        <p class="text-sm text-gray-600">Data Analyst</p>
+                                        <p class="text-xs text-gray-500">luiza.martins@empresa.com</p>
+                                        <div class="mt-3">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#660099] rounded" style="width: 91%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500">Progresso 91%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Colaborador 2 -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                <div class="p-6 flex items-center gap-4">
+                                    <img src="https://i.pravatar.cc/150?img=1" alt="Ana Souza" class="w-16 h-16 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-[#660099]">Ana Souza</h4>
+                                        <p class="text-sm text-gray-600">Product Manager</p>
+                                        <p class="text-xs text-gray-500">ana.souza@empresa.com</p>
+                                        <div class="mt-3">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#660099] rounded" style="width: 82%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500">Progresso 82%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Colaborador 3 -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                <div class="p-6 flex items-center gap-4">
+                                    <img src="https://i.pravatar.cc/150?img=3" alt="Marina Alves" class="w-16 h-16 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-[#660099]">Marina Alves</h4>
+                                        <p class="text-sm text-gray-600">UX Designer</p>
+                                        <p class="text-xs text-gray-500">marina.alves@empresa.com</p>
+                                        <div class="mt-3">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#660099] rounded" style="width: 74%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500">Progresso 74%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Colaborador 4 -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                <div class="p-6 flex items-center gap-4">
+                                    <img src="https://i.pravatar.cc/150?img=2" alt="Carlos Lima" class="w-16 h-16 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-[#660099]">Carlos Lima</h4>
+                                        <p class="text-sm text-gray-600">Dev Front-end</p>
+                                        <p class="text-xs text-gray-500">carlos.lima@empresa.com</p>
+                                        <div class="mt-3">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#660099] rounded" style="width: 67%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500">Progresso 67%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Colaborador 5 -->
+                            <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                <div class="p-6 flex items-center gap-4">
+                                    <img src="https://i.pravatar.cc/150?img=4" alt="João Pedro" class="w-16 h-16 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-[#660099]">João Pedro</h4>
+                                        <p class="text-sm text-gray-600">Dev Back-end</p>
+                                        <p class="text-xs text-gray-500">joao.pedro@empresa.com</p>
+                                        <div class="mt-3">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#660099] rounded" style="width: 55%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500">Progresso 55%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo de Trilhas -->
+             <div class="tab-content" id="trilhas">
+                        <div class="space-y-6">
+                            <h2 class="text-3xl font-extrabold text-[#660099]">Trilhas de Aprendizado</h2>
+                            <div class="tab-content" id="trilhas">
+    <div class="space-y-6">
+        <h2 class="text-3xl font-extrabold text-[#660099]">Trilhas de Aprendizado</h2>
+        
+        <div id="cursos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </div>
+</div>
+                        </div>
+                    </div>
+                
+                <!-- Conteúdo de Conquistas -->
+                <div class="tab-content" id="conquistas">
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <h3 class="text-2xl font-bold text-[#660099] mb-6 flex items-center gap-2">
+                        <i data-lucide="award" class="text-[#660099] w-6 h-6"></i> Conquistas Desbloqueadas
+                    </h3>
+                    <div id="achievementsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        <div id="achievementFirstStep" class="achievement-card locked">
+                            <div class="p-6 flex flex-col items-center text-center">
+                                <div class="text-4xl mb-3">🥇</div>
+                                <h4 class="font-bold text-[#660099]">Primeira Etapa Concluída</h4>
+                                <p class="text-sm text-gray-600 mt-1">Você completou o seu primeiro curso!</p>
+                            </div>
+                        </div>
+                        
+                        <div id="achievementHalfway" class="achievement-card locked">
+                            <div class="p-6 flex flex-col items-center text-center">
+                                <div class="text-4xl mb-3">🏆</div>
+                                <h4 class="font-bold text-[#660099]">Metade do Caminho</h4>
+                                <p class="text-sm text-gray-600 mt-1">Chegou a 50% de progresso na jornada.</p>
+                            </div>
+                        </div>
+                        
+                        </div>
+                </div>
+            </div>
+                
+                <!-- Conteúdo de Configurações -->
+                <div class="tab-content" id="configuracoes">
+                    <div class="space-y-6">
+                        <h2 class="text-3xl font-extrabold text-[#660099]">Configurações</h2>
+                        <div class="shadow-xl border-0 rounded-2xl bg-white">
+                            <div class="p-6 space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-700">Notificações por e-mail</span>
+                                    <input type="checkbox" checked class="w-5 h-5 accent-[#660099]">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-700">Tema escuro</span>
+                                    <input type="checkbox" class="w-5 h-5 accent-[#660099]">
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-700">Sincronizar calendário</span>
+                                    <input type="checkbox" checked class="w-5 h-5 accent-[#660099]">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar/editar eventos -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold text-[#660099] mb-4" id="modalTitle">Adicionar Evento</h3>
+            
+            <div class="current-date">
+                <i class="fas fa-calendar-day"></i>
+                <span id="selectedDate">18 de Setembro, 2023</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="eventTitle">Título do Evento</label>
+                <input type="text" id="eventTitle" class="form-control" placeholder="Ex: Reunião de Integração">
+            </div>
+            
+            <div class="form-group">
+                <label for="eventTime">Horário</label>
+                <input type="text" id="eventTime" class="form-control" placeholder="Ex: 09:00 - 10:00">
+            </div>
+            
+            <div class="form-group">
+                <label for="eventDescription">Descrição (opcional)</label>
+                <textarea id="eventDescription" class="form-control" rows="3" placeholder="Detalhes do evento..."></textarea>
+            </div>
+            
+            <div class="event-actions">
+                <button class="btn btn-secondary" id="cancelEvent">Cancelar</button>
+                <button class="btn btn-danger" id="deleteEvent" style="display: none;">Excluir</button>
+                <button class="btn btn-primary" id="saveEvent">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="courseActionModal">
+    <div class="modal-content relative">
+        <button id="closeCourseModal" class="absolute top-4 right-6 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+        
+        <h3 class="text-xl font-bold text-[#660099] mb-4" id="courseModalTitle">Título da Ação</h3>
+        
+        <div id="enrollContent" class="hidden">
+            <p class="mb-4 text-gray-700">Preencha seus dados para se inscrever no curso <strong id="enrollCourseName"></strong>.</p>
+            <form>
+                <div class="form-group">
+                    <label for="studentName">Nome Completo</label>
+                    <input type="text" id="studentName" class="form-control" value="Victor Andrade" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="studentEmail">E-mail</label>
+                    <input type="email" id="studentEmail" class="form-control" placeholder="seu.email@empresa.com">
+                </div>
+                <div class="event-actions">
+                    <button type="submit" class="btn btn-primary">Confirmar Inscrição</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="certificateContent" class="hidden">
+            <div class="border-2 border-purple-800 p-6 text-center bg-gray-50 rounded-lg">
+                <h4 class="text-2xl font-bold text-[#ff9900]">🎉 Parabéns! 🎉</h4>
+                <p class="mt-2 text-gray-700">Certificamos que</p>
+                <h5 class="text-2xl font-semibold text-[#660099] my-4">Victor Andrade</h5>
+                <p class="text-gray-700">concluiu com sucesso o curso</p>
+                <h6 class="text-xl font-bold text-[#660099] mt-2" id="certificateCourseName"></h6>
+                <p class="text-xs text-gray-500 mt-6">Emitido em: 17 de Setembro de 2025</p>
+            </div>
+        </div>
+
+        <div id="continueContent" class="hidden">
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <p class="text-center text-gray-800 mb-4">Módulo atual: <strong id="continueCourseName"></strong></p>
+                <div class="bg-black text-white aspect-video w-full flex items-center justify-center rounded-md">
+                    <p class="text-lg">▶️ Conteúdo do curso aqui</p>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <button class="btn btn-secondary">Aula Anterior</button>
+                    <button class="btn btn-primary">Próxima Aula</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="profileModal">
+    <div class="modal-content max-w-3xl">
+        <button id="closeProfileModal" class="absolute top-4 right-6 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+        <h3 class="text-2xl font-bold text-[#660099] mb-6">Perfil do Colaborador</h3>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="w-full md:w-1/3 text-center">
+                <img id="profileModalPicture" src="https://i.pravatar.cc/150?u=victorandrade" alt="Foto do Perfil" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-[#eb3c7d]">
+                <button id="changePictureBtn" class="mt-2 text-sm text-[#660099] hover:underline">Alterar foto</button>
+                <input type="file" id="pictureUpload" class="hidden" accept="image/*">
+
+                <h4 class="text-xl font-bold mt-4">Victor Andrade</h4>
+
+                <div class="mt-4">
+                    <label for="statusSelector" class="font-semibold text-gray-700">Meu Status:</label>
+                    <div class="flex items-center justify-center gap-2 mt-2">
+                        <span id="statusDot" class="w-4 h-4 rounded-full bg-gray-400"></span>
+                        <span id="statusText" class="font-medium">Offline</span>
+                    </div>
+                    <select id="statusSelector" class="form-control mt-2">
+                        <option value="offline">Offline</option>
+                        <option value="livre">Livre</option>
+                        <option value="reuniao">Em reunião</option>
+                        <option value="ausente">Ausente</option>
+                    </select>
+                </div>
+
+                <div class="mt-6 text-left">
+                    <label for="bioTextarea" class="font-semibold text-gray-700">Minha Biografia:</label>
+                    <textarea id="bioTextarea" class="form-control mt-2" rows="4" placeholder="Fale um pouco sobre você..."></textarea>
+                </div>
+            </div>
+
+            <div class="w-full md:w-2/3">
+                <h4 class="text-xl font-bold text-[#660099] mb-4">Minhas Conquistas</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="shadow-md border-0 rounded-2xl bg-gray-50 p-4 flex items-center gap-4">
+                        <div class="text-4xl">🥇</div>
+                        <div>
+                            <h5 class="font-bold text-[#660099]">Primeira Etapa</h5>
+                            <p class="text-sm text-gray-600">Completou a primeira etapa do onboarding.</p>
+                        </div>
+                    </div>
+                    <div class="shadow-md border-0 rounded-2xl bg-gray-50 p-4 flex items-center gap-4">
+                        <div class="text-4xl">🏆</div>
+                        <div>
+                            <h5 class="font-bold text-[#660099]">Metade do Caminho</h5>
+                            <p class="text-sm text-gray-600">Atingiu 50% de progresso na jornada.</p>
+                        </div>
+                    </div>
+                    </div>
+                <div class="mt-8 text-right">
+                    <button class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="achievementModal">
+    <div class="modal-content max-w-sm text-center">
+        <div id="achievementModalIcon" class="text-6xl mb-4">🎉</div>
+        <h3 class="text-2xl font-bold text-[#660099]" id="achievementModalTitle">Conquista Desbloqueada!</h3>
+        <p class="mt-2 text-gray-700" id="achievementModalText">Você é incrível!</p>
+        <div class="event-actions mt-6">
+            <button class="btn btn-primary w-full" id="closeAchievementModal">Continuar</button>
+        </div>
+    </div>
+</div>
+
+    <script>
+    // Inicializar ícones Lucide
+    lucide.createIcons();
+
+    // ==================================================================
+    // SCRIPT GERAL E INICIALIZAÇÃO DA PÁGINA
+    // ==================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ------------------------------------------------------------------
+        // --- GERAL: MENU LATERAL E NAVEGAÇÃO POR ABAS ---
+        // ------------------------------------------------------------------
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menu-toggle');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+
+        function changeTab(tabId) {
+            tabButtons.forEach(btn => btn.classList.toggle('text-[#ff9900]', btn.getAttribute('data-tab') === tabId));
+            tabContents.forEach(content => content.classList.toggle('active', content.id === tabId));
+            if (window.innerWidth < 1024) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+            window.scrollTo(0, 0);
+        }
+        tabButtons.forEach(button => button.addEventListener('click', () => changeTab(button.getAttribute('data-tab'))));
+        document.querySelectorAll('.go-to-tab').forEach(button => button.addEventListener('click', () => changeTab(button.getAttribute('data-tab'))));
+        
+        const toggleTopicsBtn = document.getElementById('toggle-topics');
+        const topicsContainer = document.getElementById('topics-container');
+        toggleTopicsBtn.addEventListener('click', () => {
+            const isHidden = topicsContainer.classList.toggle('hidden');
+            toggleTopicsBtn.textContent = isHidden ? 'Mostrar Tópicos' : 'Ocultar Tópicos';
+        });
+
+        // ------------------------------------------------------------------
+        // --- LÓGICA DO CALENDÁRIO ---
+        // ------------------------------------------------------------------
+        const calendarGrid = document.querySelector('.calendar-grid');
+        if (calendarGrid) {
+            const currentMonthElement = document.getElementById('currentMonth');
+            const prevMonthButton = document.getElementById('prevMonth');
+            const nextMonthButton = document.getElementById('nextMonth');
+            const eventModal = document.getElementById('eventModal');
+            const addEventBtn = document.getElementById('addEventBtn');
+            const cancelEventBtn = document.getElementById('cancelEvent');
+            const saveEventBtn = document.getElementById('saveEvent');
+            const deleteEventBtn = document.getElementById('deleteEvent');
+            const selectedDateElement = document.getElementById('selectedDate');
+            const eventTitleInput = document.getElementById('eventTitle');
+            const eventTimeInput = document.getElementById('eventTime');
+            const eventDescriptionInput = document.getElementById('eventDescription');
+            const notificationsList = document.getElementById('notificationsList');
+
+            let currentDate = new Date();
+            let selectedDate = null;
+            let events = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+            let editingEventId = null;
+
+            const formatDate = (date) => `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            const formatDateLong = (date) => date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+            const getMonthName = (monthIndex) => ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][monthIndex];
+
+            function updateNotifications() {
+                if (!notificationsList) return;
+                notificationsList.innerHTML = '';
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const eventDates = Object.keys(events).sort();
+                eventDates.forEach(dateString => {
+                    const eventDate = new Date(dateString + 'T00:00:00');
+                    if (eventDate >= today) {
+                        events[dateString].forEach(event => {
+                            const listItem = document.createElement('li');
+                            listItem.innerHTML = `<button class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-pink-50"><i data-lucide="bell" class="text-[#eb3c7d] w-4 h-4"></i><span class="text-xs">${formatDateLong(eventDate)} às ${event.time} — ${event.title}</span></button>`;
+                            notificationsList.appendChild(listItem);
+                        });
+                    }
+                });
+                lucide.createIcons();
+            }
+
+            function renderCalendar() {
+                const year = currentDate.getFullYear(), month = currentDate.getMonth();
+                currentMonthElement.textContent = `${getMonthName(month)} ${year}`;
+                calendarGrid.querySelectorAll('.calendar-day:not(.header)').forEach(day => day.remove());
+                const firstDay = new Date(year, month, 1), lastDay = new Date(year, month + 1, 0);
+                for (let i = 0; i < firstDay.getDay(); i++) calendarGrid.insertAdjacentHTML('beforeend', '<div class="calendar-day"></div>');
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const date = new Date(year, month, day);
+                    const dateString = formatDate(date);
+                    const today = new Date();
+                    const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+                    let dayHTML = `<div class="calendar-day ${isToday ? 'today' : ''} ${events[dateString] ? 'has-event' : ''}" data-date="${dateString}"><div class="day-number">${day}</div>`;
+                    if (events[dateString]) {
+                        events[dateString].forEach(event => {
+                            dayHTML += `<div class="event" data-event-id="${event.id}"><span class="event-time">${event.time}</span><span class="event-title">${event.title}</span></div>`;
+                        });
+                    }
+                    dayHTML += `</div>`;
+                    calendarGrid.insertAdjacentHTML('beforeend', dayHTML);
+                }
+            }
+
+            calendarGrid.addEventListener('click', (e) => {
+                const dayElement = e.target.closest('.calendar-day');
+                const eventElement = e.target.closest('.event');
+                if (eventElement) {
+                    const dateString = dayElement.dataset.date;
+                    const eventId = eventElement.dataset.eventId;
+                    const event = events[dateString].find(ev => ev.id === eventId);
+                    openEditEventModal(new Date(dateString + 'T00:00:00'), event);
+                } else if (dayElement) {
+                    openAddEventModal(new Date(dayElement.dataset.date + 'T00:00:00'));
+                }
+            });
+
+            const openAddEventModal = (date) => { editingEventId = null; selectedDate = date; eventModal.querySelector('#modalTitle').textContent = 'Adicionar Evento'; eventModal.querySelector('#selectedDate').textContent = formatDateLong(date); eventTitleInput.value = ''; eventTimeInput.value = ''; eventDescriptionInput.value = ''; deleteEventBtn.style.display = 'none'; eventModal.style.display = 'flex'; };
+            const openEditEventModal = (date, event) => { editingEventId = event.id; selectedDate = date; eventModal.querySelector('#modalTitle').textContent = 'Editar Evento'; eventModal.querySelector('#selectedDate').textContent = formatDateLong(date); eventTitleInput.value = event.title; eventTimeInput.value = event.time; eventDescriptionInput.value = event.description || ''; deleteEventBtn.style.display = 'block'; eventModal.style.display = 'flex'; };
+            const closeEventModal = () => { eventModal.style.display = 'none'; };
+
+            const saveEvent = () => {
+                const title = eventTitleInput.value.trim(), time = eventTimeInput.value.trim(), description = eventDescriptionInput.value.trim();
+                if (!title || !time) return alert('Preencha título e horário.');
+                const dateString = formatDate(selectedDate);
+                if (!events[dateString]) events[dateString] = [];
+                if (editingEventId) { const index = events[dateString].findIndex(e => e.id === editingEventId); if (index > -1) events[dateString][index] = { ...events[dateString][index], title, time, description }; }
+                else { events[dateString].push({ id: Date.now().toString(), title, time, description }); }
+                localStorage.setItem('calendarEvents', JSON.stringify(events));
+                closeEventModal(); renderCalendar(); updateNotifications();
+            };
+
+            const deleteEvent = () => {
+                if (!editingEventId) return;
+                const dateString = formatDate(selectedDate);
+                events[dateString] = events[dateString].filter(e => e.id !== editingEventId);
+                if (events[dateString].length === 0) delete events[dateString];
+                localStorage.setItem('calendarEvents', JSON.stringify(events));
+                closeEventModal(); renderCalendar(); updateNotifications();
+            };
+
+            prevMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
+            nextMonthButton.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
+            addEventBtn.addEventListener('click', () => openAddEventModal(new Date()));
+            cancelEventBtn.addEventListener('click', closeEventModal);
+            saveEventBtn.addEventListener('click', saveEvent);
+            deleteEventBtn.addEventListener('click', deleteEvent);
+
+            renderCalendar();
+            updateNotifications();
+        }
+
+        // --- FUNÇÃO PARA CONSTRUIR CONTEÚDO DINÂMICO ---
+        function construirCursos(cursos) {
+            const container = document.getElementById('cursos-container');
+            if (!container) return;
+            container.innerHTML = '';
+            cursos.forEach(curso => {
+                const isChecked = curso.concluido ? 'checked' : '';
+                const cardHTML = `
+                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between">
+                            <div><h4 class="text-lg font-bold text-[#660099]">${curso.titulo}</h4><span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">${curso.tag}</span></div>
+                            <span class="text-sm text-gray-600">${curso.duracao}</span>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-200 h-2 rounded"><div class="h-2 bg-[#ff9900] rounded" style="width: ${curso.progresso}%"></div></div>
+                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500"><span>Progresso</span><span>${curso.progresso}%</span></div>
+                        </div>
+                        <button class="mt-4 w-full text-white rounded-full shadow-md py-2" style="background-color: ${curso.corBotao};">${curso.statusBotao}</button>
+                        <div class="mt-4 text-right"><label class="text-sm text-gray-600 cursor-pointer"><input type="checkbox" class="course-complete-checkbox accent-[#660099]" ${isChecked}> Concluído</label></div>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+        
+        // --- FUNÇÃO PARA INICIALIZAR TODA A LÓGICA INTERATIVA PÓS-CARREGAMENTO ---
+        function inicializarLogicaInterativa() {
+            // Lógica dos modais das Trilhas
+            const courseActionModal = document.getElementById('courseActionModal');
+            if (courseActionModal) {
+                document.querySelectorAll('#trilhas button:not([class*="course-complete"])').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const courseCard = this.closest('.shadow-xl');
+                        const courseTitle = courseCard.querySelector('h4').textContent;
+                        const action = this.textContent.trim();
+                        courseActionModal.querySelectorAll('[id*="Content"]').forEach(el => el.style.display = 'none');
+                        if (action === 'Inscrever-se') { courseActionModal.querySelector('#courseModalTitle').textContent = 'Inscrição'; courseActionModal.querySelector('#enrollContent').style.display = 'block'; }
+                        else if (action === 'Ver Certificado') { courseActionModal.querySelector('#courseModalTitle').textContent = 'Certificado'; courseActionModal.querySelector('#certificateCourseName').textContent = courseTitle; courseActionModal.querySelector('#certificateContent').style.display = 'block'; }
+                        else if (action === 'Continuar') { courseActionModal.querySelector('#courseModalTitle').textContent = courseTitle; courseActionModal.querySelector('#continueCourseName').textContent = courseTitle; courseActionModal.querySelector('#continueContent').style.display = 'block'; }
+                        courseActionModal.style.display = 'flex';
+                    });
+                });
+                const closeCourseModal = () => courseActionModal.style.display = 'none';
+                courseActionModal.querySelector('#closeCourseModal').addEventListener('click', closeCourseModal);
+                courseActionModal.addEventListener('click', e => { if (e.target === courseActionModal) closeCourseModal(); });
+            }
+
+            // Lógica do modal do Perfil
+            const profileTrigger = document.getElementById('profileTrigger');
+            const profileModal = document.getElementById('profileModal');
+            if (profileTrigger) {
+                profileTrigger.addEventListener('click', () => profileModal.style.display = 'flex');
+                const closeProfileModal = () => profileModal.style.display = 'none';
+                profileModal.querySelector('#closeProfileModal').addEventListener('click', closeProfileModal);
+                profileModal.addEventListener('click', e => { if (e.target === profileModal) closeProfileModal(); });
+            }
+
+            const statusSelector = document.getElementById('statusSelector');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+// Verificação de segurança: só roda o código se os elementos existirem na página
+if (statusSelector && statusDot && statusText) {
+    
+    statusSelector.addEventListener('change', function() {
+        const selectedStatus = this.value;
+        
+        // Reseta o estilo do ponto de status para o padrão
+        statusDot.className = 'status-dot w-4 h-4 rounded-full'; 
+        
+        // Aplica a cor e o texto corretos com base na seleção
+        if (selectedStatus === 'livre') {
+            statusText.textContent = 'Livre';
+            statusDot.classList.add('status-green');
+        } else if (selectedStatus === 'reuniao') {
+            statusText.textContent = 'Em reunião';
+            statusDot.classList.add('status-red');
+        } else if (selectedStatus === 'ausente') {
+            statusText.textContent = 'Ausente';
+            statusDot.classList.add('status-yellow');
+        } else { // O padrão é 'offline'
+            statusText.textContent = 'Offline';
+            statusDot.classList.add('status-gray');
+        }
+    });
+}
+
+            // Lógica do Progresso e Conquistas
+            const progressRing = document.getElementById('progressRing');
+            if (progressRing) {
+                const progressPercentage = document.getElementById('progressPercentage'), progressText = document.getElementById('progressText');
+                const courseCheckboxes = document.querySelectorAll('.course-complete-checkbox');
+                const achievementModal = document.getElementById('achievementModal'), achievementFirstStep = document.getElementById('achievementFirstStep'), achievementHalfway = document.getElementById('achievementHalfway');
+                
+                const initializeAchievements = () => {
+                    if (localStorage.getItem('achievementFirstStepUnlocked') === 'true' && achievementFirstStep) achievementFirstStep.classList.remove('locked');
+                    if (localStorage.getItem('achievementHalfwayUnlocked') === 'true' && achievementHalfway) achievementHalfway.classList.remove('locked');
+                };
+                const showAchievementPopup = (title, text, icon) => { /* ... (código para mostrar o modal) ... */ };
+                const checkAndUnlockAchievements = (completed, percentage) => { /* ... (código para checar conquistas) ... */ };
+                const updateOverallProgress = () => {
+                    const total = courseCheckboxes.length, completed = document.querySelectorAll('.course-complete-checkbox:checked').length;
+                    const percentage = total > 0 ? (completed / total) * 100 : 0;
+                    progressText.textContent = `${completed} de ${total} cursos concluídos`;
+                    progressPercentage.textContent = `${Math.round(percentage)}%`;
+                    progressRing.style.strokeDashoffset = 100 - percentage;
+                    //checkAndUnlockAchievements(completed, percentage); // Descomente quando a lógica de conquistas estiver pronta
+                };
+
+                courseCheckboxes.forEach(checkbox => checkbox.addEventListener('change', updateOverallProgress));
+                //initializeAchievements();
+                updateOverallProgress();
+            }
+        }
+        
+        // --- FUNÇÃO PRINCIPAL QUE CARREGA OS DADOS E INICIA A PÁGINA ---
+        async function carregarDados() {
+            try {
+                const resposta = await fetch('dados.json');
+                const dados = await resposta.json();
+                construirCursos(dados.cursos);
+                inicializarLogicaInterativa();
+            } catch (erro) {
+                console.error('Erro ao carregar dados:', erro);
+            }
+        }
+
+        // Inicia tudo!
+        carregarDados();
+    });
+</script>
+</body>
+</html>

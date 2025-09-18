@@ -1,0 +1,61 @@
+{
+  "cursos": [
+    {
+      "id": "agile",
+      "titulo": "Fundamentos Ágeis",
+      "duracao": "3h",
+      "progresso": 15,
+      "tag": "Recomendado",
+      "statusBotao": "Inscrever-se",
+      "corBotao": "#eb3c7d"
+    },
+    {
+      "id": "boasvindas",
+      "titulo": "Boas-vindas e Cultura",
+      "duracao": "1h 30m",
+      "progresso": 100,
+      "tag": "Obrigatório",
+      "statusBotao": "Ver Certificado",
+      "corBotao": "#660099",
+      "concluido": true
+    },
+    {
+      "id": "ferramentas",
+      "titulo": "Ferramentas Internas",
+      "duracao": "2h",
+      "progresso": 40,
+      "tag": "Obrigatório",
+      "statusBotao": "Continuar",
+      "corBotao": "#660099"
+    },
+    {
+      "id": "seginfo",
+      "titulo": "Segurança da Informação",
+      "duracao": "1h 15m",
+      "progresso": 60,
+      "tag": "Obrigatório",
+      "statusBotao": "Continuar",
+      "corBotao": "#660099"
+    },
+    {
+      "id": "cnv",
+      "titulo": "Comunicação Não-Violenta",
+      "duracao": "1h",
+      "progresso": 0,
+      "tag": "Recomendado",
+      "statusBotao": "Inscrever-se",
+      "corBotao": "#eb3c7d"
+    }
+  ],
+  "buddy": {
+    "nome": "Ana Souza",
+    "cargo": "Gerente de Produtos Digitais",
+    "foto": "https://i.pravatar.cc/150?img=1",
+    "bio": "\"Olá! Sou a Ana, sua Buddy aqui na empresa. Adoro café, planilhas bem organizadas e ajudar novos colegas a encontrarem os melhores caminhos por aqui. Conte comigo para o que precisar!\"",
+    "contatos": [
+      { "icone": "mail", "valor": "ana.souza@empresa.com" },
+      { "icone": "phone", "valor": "(11) 99123-4567" },
+      { "icone": "message-square", "valor": "Disponível no chat interno" }
+    ]
+  }
+}

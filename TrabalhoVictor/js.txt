@@ -1,0 +1,1585 @@
+<script>
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+        
+        // Variáveis de estado
+        let menuOpen = false;
+        let topicsOpen = false;
+        let currentTab = 'dashboard';
+        
+        // Elementos DOM
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menu-toggle');
+        const toggleTopicsBtn = document.getElementById('toggle-topics');
+        const topicsContainer = document.getElementById('topics-container');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const goToTabButtons = document.querySelectorAll('.go-to-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Alternar menu mobile
+        menuToggle.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        });
+        
+        // Fechar menu ao clicar no overlay
+        overlay.addEventListener('click', () => {
+            menuOpen = false;
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+        
+        // Alternar visibilidade dos tópicos
+        toggleTopicsBtn.addEventListener('click', () => {
+            topicsOpen = !topicsOpen;
+            if (topicsOpen) {
+                topicsContainer.classList.remove('hidden');
+                toggleTopicsBtn.textContent = 'Ocultar Tópicos';
+            } else {
+                topicsContainer.classList.add('hidden');
+                toggleTopicsBtn.textContent = 'Mostrar Tópicos';
+            }
+        });
+        
+        // Navegação por abas
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                changeTab(tabId);
+                
+                // Fechar menu mobile após selecionar uma aba
+                if (window.innerWidth < 1024) {
+                    menuOpen = false;
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('open');
+                }
+            });
+        });
+        
+        // Botões que levam para abas específicas
+        goToTabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                changeTab(tabId);
+            });
+        });
+
+        // ========== CÓDIGO DAS TRILHAS DE APRENDIZADO ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do Modal de Cursos
+    const courseModal = document.getElementById('courseActionModal');
+    const closeCourseModalBtn = document.getElementById('closeCourseModal');
+    const courseModalTitle = document.getElementById('courseModalTitle');
+    
+    // Conteúdos internos do modal
+    const enrollContent = document.getElementById('enrollContent');
+    const certificateContent = document.getElementById('certificateContent');
+    const continueContent = document.getElementById('continueContent');
+    
+    // Selecionar todos os botões dentro da aba de trilhas
+    const courseButtons = document.querySelectorAll('#trilhas .shadow-xl button');
+
+    // Adicionar um evento de clique para cada botão
+    courseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Pegar o card do curso mais próximo do botão clicado
+            const courseCard = button.closest('.shadow-xl');
+            // Pegar o título do curso dentro do card
+            const courseTitle = courseCard.querySelector('h4').textContent;
+            
+            // Pegar o texto do botão para saber a ação
+            const action = button.textContent.trim();
+            
+            // Esconder todos os conteúdos para começar
+            enrollContent.style.display = 'none';
+            certificateContent.style.display = 'none';
+            continueContent.style.display = 'none';
+
+            // Decidir o que mostrar com base no botão clicado
+            if (action === 'Inscrever-se') {
+                courseModalTitle.textContent = 'Inscrição no Curso';
+                document.getElementById('enrollCourseName').textContent = courseTitle;
+                enrollContent.style.display = 'block';
+            } 
+            else if (action === 'Ver Certificado') {
+                courseModalTitle.textContent = 'Certificado de Conclusão';
+                document.getElementById('certificateCourseName').textContent = courseTitle;
+                certificateContent.style.display = 'block';
+            } 
+            else if (action === 'Continuar') {
+                courseModalTitle.textContent = courseTitle; // O título do modal é o nome do curso
+                document.getElementById('continueCourseName').textContent = courseTitle;
+                continueContent.style.display = 'block';
+            }
+            
+            // Exibir o modal
+            courseModal.style.display = 'flex';
+        });
+    });
+
+        // Função para fechar o modal de cursos
+        function closeCourseModal() {
+            courseModal.style.display = 'none';
+        }
+
+        // Eventos para fechar o modal
+        closeCourseModalBtn.addEventListener('click', closeCourseModal);
+        
+        // Fechar ao clicar fora do conteúdo
+        courseModal.addEventListener('click', function(event) {
+            if (event.target === courseModal) {
+                closeCourseModal();
+            }
+        });
+    });
+        
+        // Função para mudar de aba
+        function changeTab(tabId) {
+            // Atualizar aba ativa visualmente
+            tabButtons.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('text-[#ff9900]');
+                } else {
+                    btn.classList.remove('text-[#ff9900]');
+                }
+            });
+            
+            // Mostrar conteúdo da aba selecionada
+            tabContents.forEach(content => {
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabId;
+            
+            // Scroll para o topo
+            window.scrollTo(0, 0);
+        }
+        
+        // Fechar menu ao redimensionar para desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                menuOpen = false;
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        });
+
+        // ========== CÓDIGO DO CALENDÁRIO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM do calendário
+            const calendarGrid = document.querySelector('.calendar-grid');
+            const currentMonthElement = document.getElementById('currentMonth');
+            const prevMonthButton = document.getElementById('prevMonth');
+            const nextMonthButton = document.getElementById('nextMonth');
+            const eventModal = document.getElementById('eventModal');
+            const addEventBtn = document.getElementById('addEventBtn');
+            const cancelEventBtn = document.getElementById('cancelEvent');
+            const saveEventBtn = document.getElementById('saveEvent');
+            const deleteEventBtn = document.getElementById('deleteEvent');
+            const selectedDateElement = document.getElementById('selectedDate');
+            const eventTitleInput = document.getElementById('eventTitle');
+            const eventTimeInput = document.getElementById('eventTime');
+            const eventDescriptionInput = document.getElementById('eventDescription');
+            
+            // Estado da aplicação
+            let currentDate = new Date();
+            let selectedDate = new Date();
+            let events = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+            let editingEventId = null;
+            
+            // Inicializar o calendário
+            renderCalendar();
+            updateNotifications();
+            
+            // Event Listeners do calendário
+            prevMonthButton.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+            
+            nextMonthButton.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+            
+            addEventBtn.addEventListener('click', () => {
+                openAddEventModal(selectedDate);
+            });
+            
+            cancelEventBtn.addEventListener('click', closeEventModal);
+            
+            saveEventBtn.addEventListener('click', saveEvent);
+            
+            deleteEventBtn.addEventListener('click', deleteEvent);
+            
+            // Função para renderizar o calendário
+            function renderCalendar() {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                
+                // Atualizar o cabeçalho com o mês/ano atual
+                currentMonthElement.textContent = `${getMonthName(month)} ${year}`;
+                
+                // Limpar o grid (exceto os cabeçalhos dos dias)
+                const dayElements = document.querySelectorAll('.calendar-day:not(.header)');
+                dayElements.forEach(day => day.remove());
+                
+                // Obter o primeiro dia do mês e o último dia do mês
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                
+                // Dias da semana (0 = Domingo, 1 = Segunda, etc.)
+                const startDayOfWeek = firstDay.getDay();
+                
+                // Adicionar dias vazios no início se necessário
+                for (let i = 0; i < startDayOfWeek; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day';
+                    calendarGrid.appendChild(emptyDay);
+                }
+                
+                // Adicionar os dias do mês
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    
+                    const date = new Date(year, month, day);
+                    const dateString = formatDate(date);
+                    
+                    // Verificar se é hoje
+                    const today = new Date();
+                    if (date.getDate() === today.getDate() && 
+                        date.getMonth() === today.getMonth() && 
+                        date.getFullYear() === today.getFullYear()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Adicionar número do dia
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = day;
+                    dayElement.appendChild(dayNumber);
+                    
+                    // Adicionar eventos para este dia, se houver
+                    if (events[dateString] && events[dateString].length > 0) {
+                        dayElement.classList.add('has-event');
+                        
+                        events[dateString].forEach(event => {
+                            const eventElement = document.createElement('div');
+                            eventElement.className = 'event';
+                            eventElement.innerHTML = `
+                                <span class="event-time">${event.time}</span>
+                                <span class="event-title">${event.title}</span>
+                            `;
+                            
+                            eventElement.addEventListener('click', () => {
+                                openEditEventModal(date, event);
+                            });
+                            
+                            dayElement.appendChild(eventElement);
+                        });
+                    }
+                    
+                    // Adicionar evento de clique para adicionar evento
+                    dayElement.addEventListener('click', (e) => {
+                        if (e.target === dayElement || e.target.classList.contains('day-number')) {
+                            openAddEventModal(date);
+                        }
+                    });
+                    
+                    calendarGrid.appendChild(dayElement);
+                }
+            }
+            
+            // Função para abrir modal de adicionar evento
+            function openAddEventModal(date) {
+                editingEventId = null;
+                selectedDate = date;
+                
+                // Atualizar UI do modal
+                document.getElementById('modalTitle').textContent = 'Adicionar Evento';
+                selectedDateElement.textContent = formatDateLong(date);
+                eventTitleInput.value = '';
+                eventTimeInput.value = '';
+                eventDescriptionInput.value = '';
+                deleteEventBtn.style.display = 'none';
+                
+                // Mostrar modal
+                eventModal.style.display = 'flex';
+            }
+            
+            // Função para abrir modal de editar evento
+            function openEditEventModal(date, event) {
+                editingEventId = event.id;
+                selectedDate = date;
+                
+                // Atualizar UI do modal
+                document.getElementById('modalTitle').textContent = 'Editar Evento';
+                selectedDateElement.textContent = formatDateLong(date);
+                eventTitleInput.value = event.title;
+                eventTimeInput.value = event.time;
+                eventDescriptionInput.value = event.description || '';
+                deleteEventBtn.style.display = 'block';
+                
+                // Mostrar modal
+                eventModal.style.display = 'flex';
+            }
+            
+            // Função para fechar o modal
+            function closeEventModal() {
+                eventModal.style.display = 'none';
+            }
+            
+            // Função para salvar evento
+            function saveEvent() {
+                const title = eventTitleInput.value.trim();
+                const time = eventTimeInput.value.trim();
+                const description = eventDescriptionInput.value.trim();
+                
+                if (!title || !time) {
+                    alert('Por favor, preencha pelo menos o título e o horário do evento.');
+                    return;
+                }
+                
+                const dateString = formatDate(selectedDate);
+                
+                // Inicializar array de eventos para esta data se não existir
+                if (!events[dateString]) {
+                    events[dateString] = [];
+                }
+                
+                if (editingEventId) {
+                    // Editar evento existente
+                    const eventIndex = events[dateString].findIndex(e => e.id === editingEventId);
+                    if (eventIndex !== -1) {
+                        events[dateString][eventIndex] = {
+                            id: editingEventId,
+                            title,
+                            time,
+                            description
+                        };
+                    }
+                } else {
+                    // Adicionar novo evento
+                    const newEvent = {
+                        id: Date.now().toString(),
+                        title,
+                        time,
+                        description
+                    };
+                    
+                    events[dateString].push(newEvent);
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('calendarEvents', JSON.stringify(events));
+                
+                // Fechar modal e atualizar calendário
+                closeEventModal();
+                renderCalendar();
+                updateNotifications();
+            }
+            
+            // Função para excluir evento
+            function deleteEvent() {
+                if (!editingEventId) return;
+                
+                const dateString = formatDate(selectedDate);
+                
+                if (events[dateString]) {
+                    events[dateString] = events[dateString].filter(e => e.id !== editingEventId);
+                    
+                    // Remover a data se não houver mais eventos
+                    if (events[dateString].length === 0) {
+                        delete events[dateString];
+                    }
+                    
+                    // Salvar no localStorage
+                    localStorage.setItem('calendarEvents', JSON.stringify(events));
+                    
+                    // Fechar modal e atualizar calendário
+                    closeEventModal();
+                    renderCalendar();
+                    updateNotifications();
+                }
+            }
+            
+            // Funções auxiliares para formatação de datas
+            function formatDate(date) {
+                return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            }
+            
+            function formatDateLong(date) {
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                return date.toLocaleDateString('pt-BR', options);
+            }
+            
+            function getMonthName(monthIndex) {
+                const months = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+                return months[monthIndex];
+            }
+            
+            // Fechar modal ao clicar fora dele
+            window.addEventListener('click', (e) => {
+                if (e.target === eventModal) {
+                    closeEventModal();
+                }
+            });
+
+            // Elemento da lista de notificações
+const notificationsList = document.getElementById('notificationsList');
+
+        // Função para ATUALIZAR a lista de notificações com base nos eventos (VERSÃO CORRIGIDA)
+function updateNotifications() {
+    // 1. Procura a lista de notificações no momento do uso (mais seguro)
+    const notificationsList = document.getElementById('notificationsList');
+
+    // 2. Se não encontrar a lista por algum motivo, para a execução para não dar erro.
+    if (!notificationsList) {
+        console.error('Erro: Elemento com id="notificationsList" não foi encontrado.');
+        return;
+    }
+
+    // 3. Limpa a lista atual para não duplicar
+    notificationsList.innerHTML = '';
+
+    // 4. Pega os eventos salvos
+    const savedEvents = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+
+    // 5. Pega a data de hoje para filtrar
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+
+    // 6. Pega todas as datas que têm eventos
+    const eventDates = Object.keys(savedEvents).sort(); // .sort() para ordenar as datas
+
+    // 7. Itera sobre cada data
+    eventDates.forEach(dateString => {
+        const eventDate = new Date(dateString + 'T00:00:00'); 
+
+        // Mostra apenas eventos de hoje ou do futuro
+        if (eventDate >= today) {
+            savedEvents[dateString].forEach(event => {
+                const listItem = document.createElement('li');
+                const notificationText = `${formatDateLong(eventDate)} às ${event.time} — ${event.title}`;
+
+                listItem.innerHTML = `
+                    <button class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-pink-50">
+                        <i data-lucide="bell" class="text-[#eb3c7d] w-4 h-4"></i>
+                        <span class="text-xs">${notificationText}</span>
+                    </button>
+                `;
+                notificationsList.appendChild(listItem);
+            });
+        }
+    });
+
+    // 8. Recarrega os ícones para que os novos sinos apareçam
+    lucide.createIcons();
+}
+}
+        );
+
+        // ========== CÓDIGO DO PERFIL DO COLABORADOR ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do gatilho e do modal
+    const profileTrigger = document.getElementById('profileTrigger');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModalBtn = document.getElementById('closeProfileModal');
+    
+    // Elementos internos do modal
+    const statusSelector = document.getElementById('statusSelector');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const changePictureBtn = document.getElementById('changePictureBtn');
+    const pictureUpload = document.getElementById('pictureUpload');
+    const profilePicture = document.getElementById('profileModalPicture');
+
+    // Abrir o modal
+    profileTrigger.addEventListener('click', function() {
+        profileModal.style.display = 'flex';
+    });
+
+    // Fechar o modal
+    function closeProfileModal() {
+        profileModal.style.display = 'none';
+    }
+    closeProfileModalBtn.addEventListener('click', closeProfileModal);
+    profileModal.addEventListener('click', function(event) {
+        if (event.target === profileModal) {
+            closeProfileModal();
+        }
+    });
+
+        // Lógica para mudar o status
+        statusSelector.addEventListener('change', function() {
+            const selectedStatus = this.value;
+            
+            // Remove todas as classes de cor anteriores
+            statusDot.className = 'status-dot'; 
+            
+            if (selectedStatus === 'livre') {
+                statusText.textContent = 'Livre';
+                statusDot.classList.add('status-green');
+            } else if (selectedStatus === 'reuniao') {
+                statusText.textContent = 'Em reunião';
+                statusDot.classList.add('status-red');
+            } else if (selectedStatus === 'ausente') {
+                statusText.textContent = 'Ausente';
+                statusDot.classList.add('status-yellow');
+            } else { // offline
+                statusText.textContent = 'Offline';
+                statusDot.classList.add('status-gray');
+            }
+        });
+
+            // Lógica para alterar a foto
+            changePictureBtn.addEventListener('click', function() {
+                pictureUpload.click(); // Simula o clique no input de arquivo escondido
+            });
+            
+            pictureUpload.addEventListener('change', function(event) {
+                if (event.target.files && event.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePicture.src = e.target.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+
+        });
+
+        // ========== CÓDIGO DO PROGRESSO E CONQUISTAS  ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- PARTE 1: ELEMENTOS DO HTML ---
+            // Elementos do painel de progresso
+            const progressRing = document.getElementById('progressRing');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressText = document.getElementById('progressText');
+            
+            // Todos os checkboxes dos cursos
+            const courseCheckboxes = document.querySelectorAll('.course-complete-checkbox');
+
+            // Elementos do modal de conquista
+            const achievementModal = document.getElementById('achievementModal');
+            const achievementModalTitle = document.getElementById('achievementModalTitle');
+            const achievementModalText = document.getElementById('achievementModalText');
+            const achievementModalIcon = document.getElementById('achievementModalIcon');
+            const closeAchievementModalBtn = document.getElementById('closeAchievementModal');
+
+            // Cards de conquista
+            const achievementFirstStep = document.getElementById('achievementFirstStep');
+            const achievementHalfway = document.getElementById('achievementHalfway');
+
+            // --- PARTE 2: FUNÇÕES ---
+            // Função para mostrar o pop-up de conquista
+            function showAchievementPopup(title, text, icon) {
+                if (!achievementModal) return; // Se o modal não existir, não faz nada
+                achievementModalTitle.textContent = title;
+                achievementModalText.textContent = text;
+                achievementModalIcon.innerHTML = icon;
+                achievementModal.style.display = 'flex';
+            }
+            
+            // Função que verifica e desbloqueia as conquistas
+            function checkAndUnlockAchievements(completedCourses, percentage) {
+                if (!achievementFirstStep || !achievementHalfway) return; // Se os cards não existirem, não faz nada
+
+                // Conquista 1: Completou o primeiro curso
+                if (completedCourses >= 1 && achievementFirstStep.classList.contains('locked')) {
+                    achievementFirstStep.classList.remove('locked');
+                    showAchievementPopup('Primeira Etapa Concluída!', 'Parabéns por finalizar seu primeiro curso na jornada.', '🥇');
+                }
+
+                // Conquista 2: Atingiu 50%
+                if (percentage >= 50 && achievementHalfway.classList.contains('locked')) {
+                    achievementHalfway.classList.remove('locked');
+                    showAchievementPopup('Metade do Caminho!', 'Você já completou 50% da sua jornada de aprendizado. Continue assim!', '🏆');
+                }
+            }
+
+            // Função principal para CALCULAR O PROGRESSO e VERIFICAR AS CONQUISTAS
+            function updateOverallProgress() {
+                if (!progressRing) return; // Se o painel de progresso não existir, não faz nada
+
+                const totalCourses = courseCheckboxes.length;
+                let completedCourses = 0;
+
+                courseCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        completedCourses++;
+                    }
+                });
+
+                const percentage = totalCourses > 0 ? (completedCourses / totalCourses) * 100 : 0;
+                
+                // Atualiza os textos do progresso
+                progressText.textContent = `${completedCourses} de ${totalCourses} cursos concluídos`;
+                progressPercentage.textContent = `${Math.round(percentage)}%`;
+
+                // Atualiza o círculo de progresso
+                progressRing.style.strokeDashoffset = 100 - percentage;
+                
+                // **A MÁGICA ACONTECE AQUI**
+                // Depois de calcular tudo, ele chama a função para verificar as conquistas
+                checkAndUnlockAchievements(completedCourses, percentage);
+            }
+
+            // --- PARTE 3: EVENTOS ---
+            // Adiciona o evento para fechar o modal de conquista
+            if(closeAchievementModalBtn) {
+                closeAchievementModalBtn.addEventListener('click', () => {
+                    achievementModal.style.display = 'none';
+                });
+            }
+
+            // Adiciona um "espião" para cada checkbox.
+            courseCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateOverallProgress);
+            });
+
+            // Chama a função uma vez no início para calcular o progresso inicial
+            updateOverallProgress();
+        });
+
+        
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+    ///////////////// div de trilhas ////////////////////
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                
+                                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                    <div class="p-6">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h4 class="text-lg font-bold text-[#660099]">Fundamentos Ágeis</h4>
+                                                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">Recomendado</span>
+                                            </div>
+                                            <span class="text-sm text-gray-600">3h</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#ff9900] rounded" style="width: 15%"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                                <span>Progresso</span>
+                                                <span>15%</span>
+                                            </div>
+                                        </div>
+                                        <button class="mt-4 w-full bg-[#eb3c7d] hover:bg-pink-600 text-white rounded-full shadow-md py-2">
+                                            Inscrever-se
+                                        </button>
+                                        <div class="mt-4 text-right">
+                                            <label class="text-sm text-gray-600 cursor-pointer">
+                                                <input type="checkbox" class="course-complete-checkbox accent-[#660099]">
+                                                Concluído
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                    <div class="p-6">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h4 class="text-lg font-bold text-[#660099]">Boas-vindas e Cultura</h4>
+                                                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">Obrigatório</span>
+                                            </div>
+                                            <span class="text-sm text-gray-600">1h 30m</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#ff9900] rounded" style="width: 100%"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                                <span>Progresso</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+                                        <button class="mt-4 w-full bg-[#660099] hover:bg-purple-800 text-white rounded-full shadow-md py-2">
+                                            Ver Certificado
+                                        </button>
+                                        <div class="mt-4 text-right">
+                                            <label class="text-sm text-gray-600 cursor-pointer">
+                                                <input type="checkbox" class="course-complete-checkbox accent-[#660099]" checked>
+                                                Concluído
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                    <div class="p-6">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h4 class="text-lg font-bold text-[#660099]">Ferramentas Internas</h4>
+                                                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">Obrigatório</span>
+                                            </div>
+                                            <span class="text-sm text-gray-600">2h</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#ff9900] rounded" style="width: 40%"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                                <span>Progresso</span>
+                                                <span>40%</span>
+                                            </div>
+                                        </div>
+                                        <button class="mt-4 w-full bg-[#660099] hover:bg-purple-800 text-white rounded-full shadow-md py-2">
+                                            Continuar
+                                        </button>
+                                        <div class="mt-4 text-right">
+                                            <label class="text-sm text-gray-600 cursor-pointer">
+                                                <input type="checkbox" class="course-complete-checkbox accent-[#660099]">
+                                                Concluído
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                    <div class="p-6">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h4 class="text-lg font-bold text-[#660099]">Segurança da Informação</h4>
+                                                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">Obrigatório</span>
+                                            </div>
+                                            <span class="text-sm text-gray-600">1h 15m</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#ff9900] rounded" style="width: 60%"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                                <span>Progresso</span>
+                                                <span>60%</span>
+                                            </div>
+                                        </div>
+                                        <button class="mt-4 w-full bg-[#660099] hover:bg-purple-800 text-white rounded-full shadow-md py-2">
+                                            Continuar
+                                        </button>
+                                        <div class="mt-4 text-right">
+                                            <label class="text-sm text-gray-600 cursor-pointer">
+                                                <input type="checkbox" class="course-complete-checkbox accent-[#660099]">
+                                                Concluído
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                                    <div class="p-6">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h4 class="text-lg font-bold text-[#660099]">Comunicação Não-Violenta</h4>
+                                                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">Recomendado</span>
+                                            </div>
+                                            <span class="text-sm text-gray-600">1h</span>
+                                        </div>
+                                        <div class="mt-4">
+                                            <div class="w-full bg-gray-200 h-2 rounded">
+                                                <div class="h-2 bg-[#ff9900] rounded" style="width: 0%"></div>
+                                            </div>
+                                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                                <span>Progresso</span>
+                                                <span>0%</span>
+                                            </div>
+                                        </div>
+                                        <button class="mt-4 w-full bg-[#eb3c7d] hover:bg-pink-600 text-white rounded-full shadow-md py-2">
+                                            Inscrever-se
+                                        </button>
+                                        <div class="mt-4 text-right">
+                                            <label class="text-sm text-gray-600 cursor-pointer">
+                                                <input type="checkbox" class="course-complete-checkbox accent-[#660099]">
+                                                Concluído
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+    
+
+//////////////////// SCRIPT 2 /////////////////////
+
+<script>
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+        
+        // Variáveis de estado
+        let menuOpen = false;
+        let topicsOpen = false;
+        let currentTab = 'dashboard';
+        
+        // Elementos DOM
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuToggle = document.getElementById('menu-toggle');
+        const toggleTopicsBtn = document.getElementById('toggle-topics');
+        const topicsContainer = document.getElementById('topics-container');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const goToTabButtons = document.querySelectorAll('.go-to-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Alternar menu mobile
+        menuToggle.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        });
+        
+        // Fechar menu ao clicar no overlay
+        overlay.addEventListener('click', () => {
+            menuOpen = false;
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+        
+        // Alternar visibilidade dos tópicos
+        toggleTopicsBtn.addEventListener('click', () => {
+            topicsOpen = !topicsOpen;
+            if (topicsOpen) {
+                topicsContainer.classList.remove('hidden');
+                toggleTopicsBtn.textContent = 'Ocultar Tópicos';
+            } else {
+                topicsContainer.classList.add('hidden');
+                toggleTopicsBtn.textContent = 'Mostrar Tópicos';
+            }
+        });
+        
+        // Navegação por abas
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                changeTab(tabId);
+                
+                // Fechar menu mobile após selecionar uma aba
+                if (window.innerWidth < 1024) {
+                    menuOpen = false;
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('open');
+                }
+            });
+        });
+        
+        // Botões que levam para abas específicas
+        goToTabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                changeTab(tabId);
+            });
+        });
+
+        // ========== CÓDIGO DAS TRILHAS DE APRENDIZADO ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do Modal de Cursos
+    const courseModal = document.getElementById('courseActionModal');
+    const closeCourseModalBtn = document.getElementById('closeCourseModal');
+    const courseModalTitle = document.getElementById('courseModalTitle');
+    
+    // Conteúdos internos do modal
+    const enrollContent = document.getElementById('enrollContent');
+    const certificateContent = document.getElementById('certificateContent');
+    const continueContent = document.getElementById('continueContent');
+    
+    // Selecionar todos os botões dentro da aba de trilhas
+    const courseButtons = document.querySelectorAll('#trilhas .shadow-xl button');
+
+    // Adicionar um evento de clique para cada botão
+    courseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Pegar o card do curso mais próximo do botão clicado
+            const courseCard = button.closest('.shadow-xl');
+            // Pegar o título do curso dentro do card
+            const courseTitle = courseCard.querySelector('h4').textContent;
+            
+            // Pegar o texto do botão para saber a ação
+            const action = button.textContent.trim();
+            
+            // Esconder todos os conteúdos para começar
+            enrollContent.style.display = 'none';
+            certificateContent.style.display = 'none';
+            continueContent.style.display = 'none';
+
+            // Decidir o que mostrar com base no botão clicado
+            if (action === 'Inscrever-se') {
+                courseModalTitle.textContent = 'Inscrição no Curso';
+                document.getElementById('enrollCourseName').textContent = courseTitle;
+                enrollContent.style.display = 'block';
+            } 
+            else if (action === 'Ver Certificado') {
+                courseModalTitle.textContent = 'Certificado de Conclusão';
+                document.getElementById('certificateCourseName').textContent = courseTitle;
+                certificateContent.style.display = 'block';
+            } 
+            else if (action === 'Continuar') {
+                courseModalTitle.textContent = courseTitle; // O título do modal é o nome do curso
+                document.getElementById('continueCourseName').textContent = courseTitle;
+                continueContent.style.display = 'block';
+            }
+            
+            // Exibir o modal
+            courseModal.style.display = 'flex';
+        });
+    });
+
+        // Função para fechar o modal de cursos
+        function closeCourseModal() {
+            courseModal.style.display = 'none';
+        }
+
+        // Eventos para fechar o modal
+        closeCourseModalBtn.addEventListener('click', closeCourseModal);
+        
+        // Fechar ao clicar fora do conteúdo
+        courseModal.addEventListener('click', function(event) {
+            if (event.target === courseModal) {
+                closeCourseModal();
+            }
+        });
+    });
+        
+        // Função para mudar de aba
+        function changeTab(tabId) {
+            // Atualizar aba ativa visualmente
+            tabButtons.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('text-[#ff9900]');
+                } else {
+                    btn.classList.remove('text-[#ff9900]');
+                }
+            });
+            
+            // Mostrar conteúdo da aba selecionada
+            tabContents.forEach(content => {
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabId;
+            
+            // Scroll para o topo
+            window.scrollTo(0, 0);
+        }
+        
+        // Fechar menu ao redimensionar para desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                menuOpen = false;
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        });
+
+        // ========== CÓDIGO DO CALENDÁRIO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM do calendário
+            const calendarGrid = document.querySelector('.calendar-grid');
+            const currentMonthElement = document.getElementById('currentMonth');
+            const prevMonthButton = document.getElementById('prevMonth');
+            const nextMonthButton = document.getElementById('nextMonth');
+            const eventModal = document.getElementById('eventModal');
+            const addEventBtn = document.getElementById('addEventBtn');
+            const cancelEventBtn = document.getElementById('cancelEvent');
+            const saveEventBtn = document.getElementById('saveEvent');
+            const deleteEventBtn = document.getElementById('deleteEvent');
+            const selectedDateElement = document.getElementById('selectedDate');
+            const eventTitleInput = document.getElementById('eventTitle');
+            const eventTimeInput = document.getElementById('eventTime');
+            const eventDescriptionInput = document.getElementById('eventDescription');
+            
+            // Estado da aplicação
+            let currentDate = new Date();
+            let selectedDate = new Date();
+            let events = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+            let editingEventId = null;
+            
+            // Inicializar o calendário
+            renderCalendar();
+            updateNotifications();
+            
+            // Event Listeners do calendário
+            prevMonthButton.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+            
+            nextMonthButton.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+            
+            addEventBtn.addEventListener('click', () => {
+                openAddEventModal(selectedDate);
+            });
+            
+            cancelEventBtn.addEventListener('click', closeEventModal);
+            
+            saveEventBtn.addEventListener('click', saveEvent);
+            
+            deleteEventBtn.addEventListener('click', deleteEvent);
+            
+            // Função para renderizar o calendário
+            function renderCalendar() {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                
+                // Atualizar o cabeçalho com o mês/ano atual
+                currentMonthElement.textContent = `${getMonthName(month)} ${year}`;
+                
+                // Limpar o grid (exceto os cabeçalhos dos dias)
+                const dayElements = document.querySelectorAll('.calendar-day:not(.header)');
+                dayElements.forEach(day => day.remove());
+                
+                // Obter o primeiro dia do mês e o último dia do mês
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                
+                // Dias da semana (0 = Domingo, 1 = Segunda, etc.)
+                const startDayOfWeek = firstDay.getDay();
+                
+                // Adicionar dias vazios no início se necessário
+                for (let i = 0; i < startDayOfWeek; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day';
+                    calendarGrid.appendChild(emptyDay);
+                }
+                
+                // Adicionar os dias do mês
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    
+                    const date = new Date(year, month, day);
+                    const dateString = formatDate(date);
+                    
+                    // Verificar se é hoje
+                    const today = new Date();
+                    if (date.getDate() === today.getDate() && 
+                        date.getMonth() === today.getMonth() && 
+                        date.getFullYear() === today.getFullYear()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Adicionar número do dia
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = day;
+                    dayElement.appendChild(dayNumber);
+                    
+                    // Adicionar eventos para este dia, se houver
+                    if (events[dateString] && events[dateString].length > 0) {
+                        dayElement.classList.add('has-event');
+                        
+                        events[dateString].forEach(event => {
+                            const eventElement = document.createElement('div');
+                            eventElement.className = 'event';
+                            eventElement.innerHTML = `
+                                <span class="event-time">${event.time}</span>
+                                <span class="event-title">${event.title}</span>
+                            `;
+                            
+                            eventElement.addEventListener('click', () => {
+                                openEditEventModal(date, event);
+                            });
+                            
+                            dayElement.appendChild(eventElement);
+                        });
+                    }
+                    
+                    // Adicionar evento de clique para adicionar evento
+                    dayElement.addEventListener('click', (e) => {
+                        if (e.target === dayElement || e.target.classList.contains('day-number')) {
+                            openAddEventModal(date);
+                        }
+                    });
+                    
+                    calendarGrid.appendChild(dayElement);
+                }
+            }
+            
+            // Função para abrir modal de adicionar evento
+            function openAddEventModal(date) {
+                editingEventId = null;
+                selectedDate = date;
+                
+                // Atualizar UI do modal
+                document.getElementById('modalTitle').textContent = 'Adicionar Evento';
+                selectedDateElement.textContent = formatDateLong(date);
+                eventTitleInput.value = '';
+                eventTimeInput.value = '';
+                eventDescriptionInput.value = '';
+                deleteEventBtn.style.display = 'none';
+                
+                // Mostrar modal
+                eventModal.style.display = 'flex';
+            }
+            
+            // Função para abrir modal de editar evento
+            function openEditEventModal(date, event) {
+                editingEventId = event.id;
+                selectedDate = date;
+                
+                // Atualizar UI do modal
+                document.getElementById('modalTitle').textContent = 'Editar Evento';
+                selectedDateElement.textContent = formatDateLong(date);
+                eventTitleInput.value = event.title;
+                eventTimeInput.value = event.time;
+                eventDescriptionInput.value = event.description || '';
+                deleteEventBtn.style.display = 'block';
+                
+                // Mostrar modal
+                eventModal.style.display = 'flex';
+            }
+            
+            // Função para fechar o modal
+            function closeEventModal() {
+                eventModal.style.display = 'none';
+            }
+            
+            // Função para salvar evento
+            function saveEvent() {
+                const title = eventTitleInput.value.trim();
+                const time = eventTimeInput.value.trim();
+                const description = eventDescriptionInput.value.trim();
+                
+                if (!title || !time) {
+                    alert('Por favor, preencha pelo menos o título e o horário do evento.');
+                    return;
+                }
+                
+                const dateString = formatDate(selectedDate);
+                
+                // Inicializar array de eventos para esta data se não existir
+                if (!events[dateString]) {
+                    events[dateString] = [];
+                }
+                
+                if (editingEventId) {
+                    // Editar evento existente
+                    const eventIndex = events[dateString].findIndex(e => e.id === editingEventId);
+                    if (eventIndex !== -1) {
+                        events[dateString][eventIndex] = {
+                            id: editingEventId,
+                            title,
+                            time,
+                            description
+                        };
+                    }
+                } else {
+                    // Adicionar novo evento
+                    const newEvent = {
+                        id: Date.now().toString(),
+                        title,
+                        time,
+                        description
+                    };
+                    
+                    events[dateString].push(newEvent);
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('calendarEvents', JSON.stringify(events));
+                
+                // Fechar modal e atualizar calendário
+                closeEventModal();
+                renderCalendar();
+                updateNotifications();
+            }
+            
+            // Função para excluir evento
+            function deleteEvent() {
+                if (!editingEventId) return;
+                
+                const dateString = formatDate(selectedDate);
+                
+                if (events[dateString]) {
+                    events[dateString] = events[dateString].filter(e => e.id !== editingEventId);
+                    
+                    // Remover a data se não houver mais eventos
+                    if (events[dateString].length === 0) {
+                        delete events[dateString];
+                    }
+                    
+                    // Salvar no localStorage
+                    localStorage.setItem('calendarEvents', JSON.stringify(events));
+                    
+                    // Fechar modal e atualizar calendário
+                    closeEventModal();
+                    renderCalendar();
+                    updateNotifications();
+                }
+            }
+            
+            // Funções auxiliares para formatação de datas
+            function formatDate(date) {
+                return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            }
+            
+            function formatDateLong(date) {
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                return date.toLocaleDateString('pt-BR', options);
+            }
+            
+            function getMonthName(monthIndex) {
+                const months = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+                return months[monthIndex];
+            }
+            
+            // Fechar modal ao clicar fora dele
+            window.addEventListener('click', (e) => {
+                if (e.target === eventModal) {
+                    closeEventModal();
+                }
+            });
+
+            // Elemento da lista de notificações
+const notificationsList = document.getElementById('notificationsList');
+
+        // Função para ATUALIZAR a lista de notificações com base nos eventos (VERSÃO CORRIGIDA)
+function updateNotifications() {
+    // 1. Procura a lista de notificações no momento do uso (mais seguro)
+    const notificationsList = document.getElementById('notificationsList');
+
+    // 2. Se não encontrar a lista por algum motivo, para a execução para não dar erro.
+    if (!notificationsList) {
+        console.error('Erro: Elemento com id="notificationsList" não foi encontrado.');
+        return;
+    }
+
+    // 3. Limpa a lista atual para não duplicar
+    notificationsList.innerHTML = '';
+
+    // 4. Pega os eventos salvos
+    const savedEvents = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+
+    // 5. Pega a data de hoje para filtrar
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+
+    // 6. Pega todas as datas que têm eventos
+    const eventDates = Object.keys(savedEvents).sort(); // .sort() para ordenar as datas
+
+    // 7. Itera sobre cada data
+    eventDates.forEach(dateString => {
+        const eventDate = new Date(dateString + 'T00:00:00'); 
+
+        // Mostra apenas eventos de hoje ou do futuro
+        if (eventDate >= today) {
+            savedEvents[dateString].forEach(event => {
+                const listItem = document.createElement('li');
+                const notificationText = `${formatDateLong(eventDate)} às ${event.time} — ${event.title}`;
+
+                listItem.innerHTML = `
+                    <button class="w-full text-left flex items-center gap-2 p-2 rounded-md hover:bg-pink-50">
+                        <i data-lucide="bell" class="text-[#eb3c7d] w-4 h-4"></i>
+                        <span class="text-xs">${notificationText}</span>
+                    </button>
+                `;
+                notificationsList.appendChild(listItem);
+            });
+        }
+    });
+
+    // 8. Recarrega os ícones para que os novos sinos apareçam
+    lucide.createIcons();
+}
+}
+        );
+
+        // ========== CÓDIGO DO PERFIL DO COLABORADOR ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do gatilho e do modal
+    const profileTrigger = document.getElementById('profileTrigger');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModalBtn = document.getElementById('closeProfileModal');
+    
+    // Elementos internos do modal
+    const statusSelector = document.getElementById('statusSelector');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const changePictureBtn = document.getElementById('changePictureBtn');
+    const pictureUpload = document.getElementById('pictureUpload');
+    const profilePicture = document.getElementById('profileModalPicture');
+
+    // Abrir o modal
+    profileTrigger.addEventListener('click', function() {
+        profileModal.style.display = 'flex';
+    });
+
+    // Fechar o modal
+    function closeProfileModal() {
+        profileModal.style.display = 'none';
+    }
+    closeProfileModalBtn.addEventListener('click', closeProfileModal);
+    profileModal.addEventListener('click', function(event) {
+        if (event.target === profileModal) {
+            closeProfileModal();
+        }
+    });
+
+        // Lógica para mudar o status
+        statusSelector.addEventListener('change', function() {
+            const selectedStatus = this.value;
+            
+            // Remove todas as classes de cor anteriores
+            statusDot.className = 'status-dot'; 
+            
+            if (selectedStatus === 'livre') {
+                statusText.textContent = 'Livre';
+                statusDot.classList.add('status-green');
+            } else if (selectedStatus === 'reuniao') {
+                statusText.textContent = 'Em reunião';
+                statusDot.classList.add('status-red');
+            } else if (selectedStatus === 'ausente') {
+                statusText.textContent = 'Ausente';
+                statusDot.classList.add('status-yellow');
+            } else { // offline
+                statusText.textContent = 'Offline';
+                statusDot.classList.add('status-gray');
+            }
+        });
+
+            // Lógica para alterar a foto
+            changePictureBtn.addEventListener('click', function() {
+                pictureUpload.click(); // Simula o clique no input de arquivo escondido
+            });
+            
+            pictureUpload.addEventListener('change', function(event) {
+                if (event.target.files && event.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePicture.src = e.target.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+
+        });
+
+        // ========== CÓDIGO DO PROGRESSO E CONQUISTAS  ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- PARTE 1: ELEMENTOS DO HTML ---
+            // Elementos do painel de progresso
+            const progressRing = document.getElementById('progressRing');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressText = document.getElementById('progressText');
+            
+            // Todos os checkboxes dos cursos
+            const courseCheckboxes = document.querySelectorAll('.course-complete-checkbox');
+
+            // Elementos do modal de conquista
+            const achievementModal = document.getElementById('achievementModal');
+            const achievementModalTitle = document.getElementById('achievementModalTitle');
+            const achievementModalText = document.getElementById('achievementModalText');
+            const achievementModalIcon = document.getElementById('achievementModalIcon');
+            const closeAchievementModalBtn = document.getElementById('closeAchievementModal');
+
+            // Cards de conquista
+            const achievementFirstStep = document.getElementById('achievementFirstStep');
+            const achievementHalfway = document.getElementById('achievementHalfway');
+
+            // --- PARTE 2: FUNÇÕES ---
+
+            // Função para inicializar o estado visual das conquistas ao carregar a página
+
+            function initializeAchievements() {
+                if (localStorage.getItem('achievementFirstStepUnlocked') === 'true') {
+                    achievementFirstStep.classList.remove('locked');
+                }
+                if (localStorage.getItem('achievementHalfwayUnlocked') === 'true') {
+                    achievementHalfway.classList.remove('locked');
+                }
+            }
+
+            // Função para mostrar o pop-up de conquista
+            function showAchievementPopup(title, text, icon) {
+                if (!achievementModal) return; // Se o modal não existir, não faz nada
+                achievementModalTitle.textContent = title;
+                achievementModalText.textContent = text;
+                achievementModalIcon.innerHTML = icon;
+                achievementModal.style.display = 'flex';
+            }
+            
+            // Função que verifica e desbloqueia as conquistas 
+            function checkAndUnlockAchievements(completedCourses, percentage) {
+            if (!achievementFirstStep || !achievementHalfway) return;
+
+            // Conquista 1: Verifica se a meta foi atingida E se a conquista ainda não foi salva na memória
+            if (completedCourses >= 1 && localStorage.getItem('achievementFirstStepUnlocked') !== 'true') {
+                achievementFirstStep.classList.remove('locked');
+                showAchievementPopup('Primeira Etapa Concluída!', 'Parabéns por finalizar seu primeiro curso na jornada.', '🥇');
+                localStorage.setItem('achievementFirstStepUnlocked', 'true'); // Salva na memória
+            }
+
+            // Conquista 2: Verifica se a meta foi atingida E se a conquista ainda não foi salva na memória
+            if (percentage >= 50 && localStorage.getItem('achievementHalfwayUnlocked') !== 'true') {
+                achievementHalfway.classList.remove('locked');
+                showAchievementPopup('Metade do Caminho!', 'Você já completou 50% da sua jornada de aprendizado. Continue assim!', '🏆');
+                localStorage.setItem('achievementHalfwayUnlocked', 'true'); // Salva na memória
+            }
+        }
+
+            // Função principal para CALCULAR O PROGRESSO e VERIFICAR AS CONQUISTAS
+            function updateOverallProgress() {
+                if (!progressRing) return; // Se o painel de progresso não existir, não faz nada
+
+                const totalCourses = courseCheckboxes.length;
+                let completedCourses = 0;
+
+                courseCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        completedCourses++;
+                    }
+                });
+
+                const percentage = totalCourses > 0 ? (completedCourses / totalCourses) * 100 : 0;
+                
+                // Atualiza os textos do progresso
+                progressText.textContent = `${completedCourses} de ${totalCourses} cursos concluídos`;
+                progressPercentage.textContent = `${Math.round(percentage)}%`;
+
+                // Atualiza o círculo de progresso
+                progressRing.style.strokeDashoffset = 100 - percentage;
+                
+                // **A MÁGICA ACONTECE AQUI**
+                // Depois de calcular tudo, ele chama a função para verificar as conquistas
+                checkAndUnlockAchievements(completedCourses, percentage);
+            }
+
+            // --- PARTE 3: EVENTOS ---
+            // Adiciona o evento para fechar o modal de conquista
+            if(closeAchievementModalBtn) {
+                closeAchievementModalBtn.addEventListener('click', () => {
+                    achievementModal.style.display = 'none';
+                });
+            }
+
+            // Adiciona um "espião" para cada checkbox.
+            courseCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateOverallProgress);
+            });
+
+            // Chama a função uma vez no início para calcular o progresso inicial
+            initializeAchievements();
+            updateOverallProgress();
+        });
+
+        // ========== CÓDIGO PARA CARREGAR DADOS DINAMICAMENTE (API SIMULADA) ==========
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Função que busca os dados no arquivo JSON
+    async function carregarDados() {
+        try {
+            const resposta = await fetch('dados.json'); // 1. Pede o arquivo
+            if (!resposta.ok) {
+                throw new Error('Não foi possível carregar os dados.');
+            }
+            const dados = await resposta.json(); // 2. Transforma o texto em objeto
+            
+            // 3. Usa os dados para construir as seções
+            construirCursos(dados.cursos);
+            // Futuramente: construirBuddy(dados.buddy);
+            
+        } catch (erro) {
+            console.error('Erro ao buscar dados:', erro);
+            document.getElementById('cursos-container').innerHTML = '<p>Erro ao carregar os cursos.</p>';
+        }
+    }
+
+    // Função que constrói o HTML dos cards de curso
+    function construirCursos(cursos) {
+        const container = document.getElementById('cursos-container');
+        if (!container) return;
+
+        container.innerHTML = ''; // Limpa o container antes de adicionar
+
+        cursos.forEach(curso => {
+            const isChecked = curso.concluido ? 'checked' : '';
+
+            // Cria o HTML de cada card usando os dados do JSON
+            const cardHTML = `
+                <div class="shadow-xl border-0 rounded-2xl bg-white">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="text-lg font-bold text-[#660099]">${curso.titulo}</h4>
+                                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 text-[#660099]">${curso.tag}</span>
+                            </div>
+                            <span class="text-sm text-gray-600">${curso.duracao}</span>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-200 h-2 rounded">
+                                <div class="h-2 bg-[#ff9900] rounded" style="width: ${curso.progresso}%"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1 text-xs text-gray-500">
+                                <span>Progresso</span>
+                                <span>${curso.progresso}%</span>
+                            </div>
+                        </div>
+                        <button class="mt-4 w-full text-white rounded-full shadow-md py-2" style="background-color: ${curso.corBotao};">
+                            ${curso.statusBotao}
+                        </button>
+                        <div class="mt-4 text-right">
+                            <label class="text-sm text-gray-600 cursor-pointer">
+                                <input type="checkbox" class="course-complete-checkbox accent-[#660099]" ${isChecked}>
+                                Concluído
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Adiciona o novo card ao container
+            container.insertAdjacentHTML('beforeend', cardHTML);
+        });
+    }
+
+    // Chama a função principal para iniciar o processo
+    carregarDados();
+});
+
+        
+
+    </script>
