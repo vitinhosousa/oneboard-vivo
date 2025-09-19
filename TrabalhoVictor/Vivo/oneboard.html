@@ -313,6 +313,45 @@
                 font-size: 12px;
             }
         }
+
+                /* ================================================= */
+        /* === ESTILOS MODERNOS PARA OS CARDS DE CURSO === */
+        /* ================================================= */
+
+        /* 1. Estilo base do card com sombra suave e transição */
+        #trilhas .shadow-xl {
+            /* Substitui a sombra padrão por uma mais suave e moderna */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0; /* Borda sutil para definir o card */
+            transition: all 0.3s ease-in-out; /* A MÁGICA: Anima qualquer mudança suavemente */
+        }
+
+        /* 2. Efeito de "flutuar" ao passar o mouse */
+        #trilhas .shadow-xl:hover {
+            transform: translateY(-8px); /* Levanta o card um pouquinho */
+            box-shadow: 0 12px 25px rgba(102, 0, 153, 0.1); /* Sombra roxa mais pronunciada */
+        }
+
+        /* 3. Animação e feedback para os botões principais */
+        #trilhas button {
+            transition: all 0.2s ease-in-out;
+        }
+        #trilhas button:hover {
+            transform: scale(1.03); /* Aumenta um pouco o botão */
+        }
+
+        /* 4. Deixando a opção "Concluído" com um visual mais limpo */
+        #trilhas .mt-4.text-right label {
+            display: inline-flex; /* Garante o alinhamento perfeito */
+            align-items: center;
+            padding: 6px 12px;
+            background-color: #f7f3ff; /* Fundo roxo bem claro */
+            border-radius: 9999px; /* Totalmente arredondado */
+            transition: background-color 0.2s ease;
+        }
+        #trilhas .mt-4.text-right label:hover {
+            background-color: #ede9fe; /* Escurece um pouco no hover */
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -686,8 +725,6 @@
                         <div class="space-y-6">
                             <h2 class="text-3xl font-extrabold text-[#660099]">Trilhas de Aprendizado</h2>
                             <div class="tab-content" id="trilhas">
-    <div class="space-y-6">
-        <h2 class="text-3xl font-extrabold text-[#660099]">Trilhas de Aprendizado</h2>
         
         <div id="cursos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             </div>
