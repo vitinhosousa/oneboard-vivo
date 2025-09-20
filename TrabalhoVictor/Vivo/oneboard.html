@@ -721,45 +721,86 @@
                 </div>
                 
                 <!-- Conteúdo de Trilhas -->
-             <div class="tab-content" id="trilhas">
-                        <div class="space-y-6">
-                            <h2 class="text-3xl font-extrabold text-[#660099]">Trilhas de Aprendizado</h2>
-                            <div class="tab-content" id="trilhas">
-        
-        <div id="cursos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>
-    </div>
-</div>
-                        </div>
+                <div class="tab-content" id="trilhas">
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-extrabold text-[#660099]">Trilhas de Aprendizado</h2>
+
+                    <!-- container dos cursos (preenchido pelo JS) -->
+                    <div id="cursos-container"
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     </div>
-                
+                </div>
+                </div>
+
                 <!-- Conteúdo de Conquistas -->
                 <div class="tab-content" id="conquistas">
                 <div class="bg-white p-8 rounded-2xl shadow-xl">
                     <h3 class="text-2xl font-bold text-[#660099] mb-6 flex items-center gap-2">
-                        <i data-lucide="award" class="text-[#660099] w-6 h-6"></i> Conquistas Desbloqueadas
+                    <i data-lucide="award" class="text-[#660099] w-6 h-6"></i>
+                    Conquistas Desbloqueadas
                     </h3>
-                    <div id="achievementsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        
-                        <div id="achievementFirstStep" class="achievement-card locked">
-                            <div class="p-6 flex flex-col items-center text-center">
-                                <div class="text-4xl mb-3">🥇</div>
-                                <h4 class="font-bold text-[#660099]">Primeira Etapa Concluída</h4>
-                                <p class="text-sm text-gray-600 mt-1">Você completou o seu primeiro curso!</p>
-                            </div>
+
+                    <!-- grid alinhado à esquerda -->
+                    <div id="achievementsContainer"
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Conquista 1 -->
+                    <div id="achievementFirstStep" class="achievement-card locked">
+                        <div class="p-6 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-3">🥇</div>
+                        <h4 class="font-bold text-[#660099]">Primeira Etapa Concluída</h4>
+                        <p class="text-sm text-gray-600 mt-1">Você completou o seu primeiro curso!</p>
                         </div>
-                        
-                        <div id="achievementHalfway" class="achievement-card locked">
-                            <div class="p-6 flex flex-col items-center text-center">
-                                <div class="text-4xl mb-3">🏆</div>
-                                <h4 class="font-bold text-[#660099]">Metade do Caminho</h4>
-                                <p class="text-sm text-gray-600 mt-1">Chegou a 50% de progresso na jornada.</p>
-                            </div>
+                    </div>
+
+                    <!-- Conquista 2 -->
+                    <div id="achievementHalfway" class="achievement-card locked">
+                        <div class="p-6 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-3">🏆</div>
+                        <h4 class="font-bold text-[#660099]">Metade do Caminho</h4>
+                        <p class="text-sm text-gray-600 mt-1">Chegou a 50% de progresso na jornada.</p>
                         </div>
-                        
+                    </div>
+
+                    <!-- Conquista 3 -->
+                    <div id="achievementPersistence" class="achievement-card locked">
+                        <div class="p-6 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-3">🔥</div>
+                        <h4 class="font-bold text-[#660099]">Persistência</h4>
+                        <p class="text-sm text-gray-600 mt-1">Você acessou a plataforma por 7 dias seguidos.</p>
                         </div>
+                    </div>
+
+                    <!-- Conquista 4 -->
+                    <div id="achievementFinisher" class="achievement-card locked">
+                        <div class="p-6 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-3">🎓</div>
+                        <h4 class="font-bold text-[#660099]">Concluidor</h4>
+                        <p class="text-sm text-gray-600 mt-1">Finalizou todos os cursos de uma trilha.</p>
+                        </div>
+                    </div>
+
+                    <!-- Conquista 5 -->
+                    <div id="achievementHelper" class="achievement-card locked">
+                        <div class="p-6 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-3">🤝</div>
+                        <h4 class="font-bold text-[#660099]">Colaborador</h4>
+                        <p class="text-sm text-gray-600 mt-1">Ajudou outro colega em uma atividade.</p>
+                        </div>
+                    </div>
+
+                    <!-- Conquista 6 -->
+                    <div id="achievementMaster" class="achievement-card locked">
+                        <div class="p-6 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-3">⭐</div>
+                        <h4 class="font-bold text-[#660099]">Mestre da Jornada</h4>
+                        <p class="text-sm text-gray-600 mt-1">Alcançou 100% de progresso em todas as trilhas.</p>
+                        </div>
+                    </div>
+
+                    </div>
                 </div>
-            </div>
+                </div>
                 
                 <!-- Conteúdo de Configurações -->
                 <div class="tab-content" id="configuracoes">
